@@ -97,7 +97,7 @@ public class TroncalController {
 	public ResponseEntity<String> addTroncal2(@RequestBody Troncal troncal) {
 		List<Troncal> troncales = (List<Troncal>) dao.findAll(); 
 		boolean existe = false;
-		for (int i = 0; i < troncales.size()&&!troncales.isEmpty()&&!existe; i++) {
+		for (int i = 0; i < troncales.size()&&!existe; i++) {
 			if(troncales.get(i).getCodTroncal().equals(troncal.getCodTroncal())) {
 				existe = true;
 				System.out.println("La troncal ya existe.");

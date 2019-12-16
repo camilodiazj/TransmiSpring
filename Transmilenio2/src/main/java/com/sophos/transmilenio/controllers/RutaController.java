@@ -75,12 +75,23 @@ public class RutaController {
 	@ApiOperation(value = "Registro de rutas", response = String.class, httpMethod = "POST")
 	@PostMapping("/listas")
 	public  ResponseEntity<String> addRuta(@RequestBody Ruta ruta) {
-		try {
-			dao.save(ruta);
-		} catch (Exception e) {
+		List<Ruta> rutas = (List<Ruta>) dao.findAll();
+		boolean existe = false;
+		for (int i = 0; i < rutas.size()&&!existe; i++) {
+			if(rutas.get(i).getCodRuta().equals(ruta.getCodRuta())) {
+				existe = true;
+			}
+		}
+		if(!ruta.getCodRuta().isEmpty()&&!ruta.getNombre().isEmpty()&&!existe) {
+			try {
+				dao.save(ruta);
+			} catch (Exception e) {
+				return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
+			}
+			   return new ResponseEntity<String>(HttpStatus.CREATED);	
+		}else {
 			return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
 		}
-		   return new ResponseEntity<String>(HttpStatus.CREATED);
 	}
 	
 	@ApiOperation(value = "Borrado de ruta por id", response = String.class, httpMethod = "DELETE")
@@ -98,16 +109,19 @@ public class RutaController {
 	@PutMapping("/")
 	@Transactional       
 	public  ResponseEntity<String> actualizarEstacion(@RequestBody Ruta ruta) {
-	    try {         
-	    	em.createNativeQuery("UPDATE Ruta SET nombre = ?, inicioOperacion = ?, finOperacion = ? WHERE codRuta= ? ")
-		      .setParameter(1, ruta.getNombre())
-		      .setParameter(2, ruta.getInicioOperacion())
-		      .setParameter(3, ruta.getInicioOperacion())
-		      .setParameter(4, ruta.getCodRuta())
-		      .executeUpdate();
-		} catch (Exception e) {
-			return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
-		}
-	    return new ResponseEntity<String>(HttpStatus.CREATED);
+	    System.out.println(ruta.getCodRuta());
+	    System.out.println(ruta.getNombre());
+		if(!ruta.getCodRuta().isEmpty()&&!ruta.getNombre().isEmpty()) {
+		    	em.createNativeQuery("UPDATE Ruta SET nombre = ?, inicioOperacion = ?, finOperacion = ? WHERE codRuta= ? ")
+			      .setParameter(1, ruta.getNombre())
+			      .setParameter(2, ruta.getInicioOperacion())
+			      .setParameter(3, ruta.getInicioOperacion())
+			      .setParameter(4, ruta.getCodRuta())
+			      .executeUpdate();		    	
+		    return new ResponseEntity<String>(HttpStatus.CREATED);
+	    }else {
+	    	return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
+	    }
+		
 	}
 }
