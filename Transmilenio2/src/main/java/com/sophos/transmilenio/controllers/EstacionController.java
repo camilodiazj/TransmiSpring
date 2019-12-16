@@ -45,8 +45,7 @@ public class EstacionController{
 	
 	@Autowired
 	private EstacionDao dao;
-	
-	
+		
 	@ApiOperation(value = "Consulta de rutas por estación", response = Iterable.class, httpMethod = "GET")
 	@GetMapping("/{codigo}/rutas")
 	public ResponseEntity<List<Ruta>> getEstacion2(@PathVariable String codigo){
@@ -54,8 +53,7 @@ public class EstacionController{
 		      = em.createQuery("SELECT d FROM Estacion e INNER JOIN e.rutas d WHERE e.codEstacion = '"+codigo+"'", Ruta.class);
 		    List<Ruta> resultList = query.getResultList();
 		return new ResponseEntity<List<Ruta>>(resultList,HttpStatus.OK);
-	}
-	
+	}	
 	
 	@ApiOperation(value = "Consulta de estaciones", response = Iterable.class, httpMethod = "GET")
 	@GetMapping("")
@@ -77,25 +75,36 @@ public class EstacionController{
 			return new ResponseEntity<Estacion>(HttpStatus.NOT_FOUND);
 		}
 	}
-	
-	
+		
 	@ApiOperation(value = "Registro de estacion", response = String.class, httpMethod = "POST")
 	@PostMapping("")
 	@Transactional
 	public  ResponseEntity<String> addEstacion2(@RequestBody Estacion estacion) {
-	    try {
-	    	em.createNativeQuery("INSERT INTO Estacion (codEstacion, nombre, estado, horaApertura, horaCierre, codTroncal) VALUES (?,?,?,?,?,?)")
-		      .setParameter(1, estacion.getCodEstacion())
-		      .setParameter(2, estacion.getNombre())
-		      .setParameter(3, estacion.getEstado())
-		      .setParameter(4, estacion.getHoraApertura())
-		      .setParameter(5, estacion.getHoraCierre())
-		      .setParameter(6, estacion.getCodTroncal())
-		      .executeUpdate();
-		} catch (Exception e) {
+	    List<Estacion> estaciones = (List<Estacion>) dao.findAll();
+		boolean existe=false;
+	    for (int i = 0; i < estaciones.size()&&!existe; i++) {
+			if (estaciones.get(i).getCodEstacion().equals(estacion.getCodEstacion())) {
+				existe = true;
+			}
+		}		
+	    if (!existe&&!estacion.getCodTroncal().isEmpty()&&!estacion.getEstado().isEmpty()&&
+	    		!estacion.getCodEstacion().isEmpty()) {
+	    	try {
+		    	em.createNativeQuery("INSERT INTO Estacion (codEstacion, nombre, estado, horaApertura, horaCierre, codTroncal) VALUES (?,?,?,?,?,?)")
+			      .setParameter(1, estacion.getCodEstacion())
+			      .setParameter(2, estacion.getNombre())
+			      .setParameter(3, estacion.getEstado())
+			      .setParameter(4, estacion.getHoraApertura())
+			      .setParameter(5, estacion.getHoraCierre())
+			      .setParameter(6, estacion.getCodTroncal())
+			      .executeUpdate();
+		    	return new ResponseEntity<String>(HttpStatus.CREATED);
+			} catch (Exception e) {
+				return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
+			}	
+		} else {
 			return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
 		}
-	    return new ResponseEntity<String>(HttpStatus.CREATED);
 	}
 	
 	@ApiOperation(value = "Borrado de estación por id", response = String.class, httpMethod = "DELETE")
@@ -112,21 +121,26 @@ public class EstacionController{
 	@ApiOperation(value = "Actualizar estacion", response = String.class, httpMethod = "PUT")
 	@PutMapping("/")
 	@Transactional       
-	public  ResponseEntity<String> actualizarEstacion(@RequestBody Estacion estacion) {
-	    try {          //Update Estacion set nombre = "Terminall", estado="Cerrada", horaApertura="05:00:00", horaCierre="08:00:00", codTroncal = "C" where codEstacion = "B1";
-	    	em.createNativeQuery("UPDATE Estacion SET nombre = ?, estado = ?, horaApertura = ?, horaCierre = ?, codTroncal = ? WHERE codEstacion = ? ")
-		      .setParameter(1, estacion.getNombre())
-		      .setParameter(2, estacion.getEstado())
-		      .setParameter(3, estacion.getHoraApertura())
-		      .setParameter(4, estacion.getHoraCierre())
-		      .setParameter(5, estacion.getCodTroncal())
-		      .setParameter(6, estacion.getCodEstacion())
-		      .executeUpdate();
-		} catch (Exception e) {
-			return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
-		}
-	    return new ResponseEntity<String>(HttpStatus.CREATED);
+	public ResponseEntity<String> actualizarEstacion(@RequestBody Estacion estacion) {
+	    if(!estacion.getCodTroncal().isEmpty()&&!estacion.getCodEstacion().isEmpty()&&
+	    !estacion.getEstado().isEmpty()&&!estacion.getNombre().isEmpty()) {
+	    	try {          //Update Estacion set nombre = "Terminall", estado="Cerrada", horaApertura="05:00:00", horaCierre="08:00:00", codTroncal = "C" where codEstacion = "B1";
+		    	em.createNativeQuery("UPDATE Estacion SET nombre = ?, estado = ?, horaApertura = ?, horaCierre = ?, codTroncal = ? WHERE codEstacion = ? ")
+			      .setParameter(1, estacion.getNombre())
+			      .setParameter(2, estacion.getEstado())
+			      .setParameter(3, estacion.getHoraApertura())
+			      .setParameter(4, estacion.getHoraCierre())
+			      .setParameter(5, estacion.getCodTroncal())
+			      .setParameter(6, estacion.getCodEstacion())
+			      .executeUpdate();
+			} catch (Exception e) {
+				return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
+			}
+		    return new ResponseEntity<String>(HttpStatus.CREATED);	
+	    }else {
+	    	return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
+	    }
+		
 	}
-	
 	
 }

@@ -41,13 +41,12 @@ public class TroncalController {
 	EntityManagerFactory fabrica;
 	
 	@Autowired
-	private TroncalDao dao;
-	
+	private TroncalDao dao;	
 	
 	@ApiOperation(value = "Actualizar troncal", response = Iterable.class, httpMethod = "PUT")
 	@PutMapping("/")
 	@Transactional       
-	public  ResponseEntity<String> actualizarTroncal(@RequestBody Troncal troncal) {
+	public ResponseEntity<String> actualizarTroncal(@RequestBody Troncal troncal) {
 		if (troncal.getNombre().length()>0&&troncal.getCodTroncal().length()==1) {
 	    	try {          //Update Troncal set nombre = "Av.26" where codTroncal = "K";
 		    	em.createNativeQuery("UPDATE Troncal SET nombre = ? WHERE codTroncal = ? ")
@@ -63,8 +62,6 @@ public class TroncalController {
 		}
 	}
 	
-	
-	
 	@ApiOperation(value = "Consulta de estaciones por troncal", response = Iterable.class, httpMethod = "GET")
 	@GetMapping("/{codigo}/estaciones")
 	public ResponseEntity<List<Estacion>> getEstacion2(@PathVariable String codigo){
@@ -73,7 +70,6 @@ public class TroncalController {
 		    List<Estacion> resultList = query.getResultList();
 		return new ResponseEntity<List<Estacion>>(resultList,HttpStatus.OK);
 	}
-
 		
 	@ApiOperation(value = "Consulta de troncales", response = Iterable.class, httpMethod = "GET")
 	@GetMapping("")
@@ -96,10 +92,9 @@ public class TroncalController {
 		}
 	}
 	
-	//MEDIO-SIRVE
 	@ApiOperation(value = "Registro de troncales", response = String.class, httpMethod = "POST")
 	@PostMapping("")
-	public  ResponseEntity<String> addTroncal2(@RequestBody Troncal troncal) {
+	public ResponseEntity<String> addTroncal2(@RequestBody Troncal troncal) {
 		List<Troncal> troncales = (List<Troncal>) dao.findAll(); 
 		boolean existe = false;
 		for (int i = 0; i < troncales.size()&&!troncales.isEmpty()&&!existe; i++) {
