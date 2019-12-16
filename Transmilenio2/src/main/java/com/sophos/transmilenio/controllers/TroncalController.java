@@ -2,12 +2,10 @@ package com.sophos.transmilenio.controllers;
 
 import java.util.List;
 import java.util.Optional;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +18,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.sophos.transmilenio.beans.Estacion;
 import com.sophos.transmilenio.beans.Troncal;
 import com.sophos.transmilenio.daos.TroncalDao;
@@ -51,15 +48,19 @@ public class TroncalController {
 	@PutMapping("/")
 	@Transactional       
 	public  ResponseEntity<String> actualizarTroncal(@RequestBody Troncal troncal) {
-	    try {          //Update Troncal set nombre = "Av.26" where codTroncal = "K";
-	    	em.createNativeQuery("UPDATE Troncal SET nombre = ? WHERE codTroncal = ? ")
-		      .setParameter(1, troncal.getNombre())
-		      .setParameter(2, troncal.getCodTroncal())
-		      .executeUpdate();
-		} catch (Exception e) {
+		if (troncal.getNombre().length()>0&&troncal.getCodTroncal().length()==1) {
+	    	try {          //Update Troncal set nombre = "Av.26" where codTroncal = "K";
+		    	em.createNativeQuery("UPDATE Troncal SET nombre = ? WHERE codTroncal = ? ")
+			      .setParameter(1, troncal.getNombre())
+			      .setParameter(2, troncal.getCodTroncal())
+			      .executeUpdate();
+			} catch (Exception e) {
+				return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
+			}
+	    	return new ResponseEntity<String>(HttpStatus.CREATED);
+		} else {
 			return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
 		}
-	    return new ResponseEntity<String>(HttpStatus.CREATED);
 	}
 	
 	
@@ -76,7 +77,7 @@ public class TroncalController {
 		
 	@ApiOperation(value = "Consulta de troncales", response = Iterable.class, httpMethod = "GET")
 	@GetMapping("")
-	public ResponseEntity<Iterable<Troncal>> verTruncal(){
+	public ResponseEntity<Iterable<Troncal>> verTroncal(){
 		if(dao.count()>0) {
 			return new ResponseEntity<Iterable<Troncal>>(dao.findAll(),HttpStatus.OK);
 		}else {
@@ -99,12 +100,21 @@ public class TroncalController {
 	@ApiOperation(value = "Registro de troncales", response = String.class, httpMethod = "POST")
 	@PostMapping("")
 	public  ResponseEntity<String> addTroncal2(@RequestBody Troncal troncal) {
-		try {
-			dao.save(troncal);
-		} catch (Exception e) {
-			return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
+		List<Troncal> troncales = (List<Troncal>) dao.findAll(); 
+		boolean existe = false;
+		for (int i = 0; i < troncales.size()&&!troncales.isEmpty()&&!existe; i++) {
+			if(troncales.get(i).getCodTroncal().equals(troncal.getCodTroncal())) {
+				existe = true;
+				System.out.println("La troncal ya existe.");
+			}
 		}
-		   return new ResponseEntity<String>(HttpStatus.CREATED);
+		if(!troncal.getCodTroncal().isEmpty()&&!troncal.getNombre().isEmpty()&&!existe) {
+			dao.save(troncal);
+			return new ResponseEntity<String>(HttpStatus.CREATED);
+		}
+		else {
+			return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
+		}   
 	}
 	
 	@ApiOperation(value = "Borrado de troncal por id", response = String.class, httpMethod = "DELETE")
