@@ -107,9 +107,15 @@ public class EstacionController{
 		}
 	}
 	
+	@Transactional
 	@ApiOperation(value = "Borrado de estación por id", response = String.class, httpMethod = "DELETE")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<String> deleteEstacion(@PathVariable String id) {
+		
+		em.createNativeQuery("DELETE FROM EstacionRuta WHERE codEstacion= ? ")
+	      .setParameter(1, id)
+	      .executeUpdate();
+		
 		try {
 			dao.deleteById(id);
 		} catch (Exception e) {

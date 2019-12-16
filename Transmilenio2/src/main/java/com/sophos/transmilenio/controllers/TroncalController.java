@@ -112,11 +112,28 @@ public class TroncalController {
 		}   
 	}
 	
+	@Transactional
 	@ApiOperation(value = "Borrado de troncal por id", response = String.class, httpMethod = "DELETE")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<String> deleteTroncal(@PathVariable String id) {
+		 TypedQuery<Estacion> query
+	      = em.createQuery("SELECT d FROM Troncal e INNER JOIN e.estaciones d WHERE e.codTroncal = '"+id+"'", Estacion.class);
+	    List<Estacion> estaciones = query.getResultList();
+		
+	    for (int i = 0; i < estaciones.size(); i++) {
+	    	em.createNativeQuery("DELETE FROM EstacionRuta WHERE codEstacion = ? ")
+		      .setParameter(1, estaciones.get(i).getCodEstacion())
+		      .executeUpdate();
+		}
+	    
+	    em.createNativeQuery("DELETE FROM Estacion WHERE codTroncal = ? ")
+	      .setParameter(1, id)
+	      .executeUpdate();
+		
 		try {
-			dao.deleteById(id);
+			   em.createNativeQuery("DELETE FROM Troncal WHERE codTroncal = ? ")
+			      .setParameter(1, id)
+			      .executeUpdate();
 		} catch (Exception e) {
 			return new ResponseEntity<String>("No se pudo eliminar el registro",HttpStatus.BAD_REQUEST);
 		}
