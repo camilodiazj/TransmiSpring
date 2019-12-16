@@ -1,5 +1,4 @@
 	package com.sophos.transmilenio.controllers;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.sophos.transmilenio.beans.Estacion;
 import com.sophos.transmilenio.beans.Ruta;
-import com.sophos.transmilenio.beans.Troncal;
 import com.sophos.transmilenio.daos.EstacionDao;
 
 import io.swagger.annotations.Api;
