@@ -22,7 +22,7 @@ import com.sophos.transmilenio.beans.Usuario;
 import com.sophos.transmilenio.daos.IUsuarioDao;
 
 @Service
-public class UsuarioService implements UserDetailsService{
+public class UsuarioService implements IUsuarioService, UserDetailsService{
 	
 	private Logger logger = LoggerFactory.getLogger(UsuarioService.class);
 	
@@ -48,6 +48,12 @@ public class UsuarioService implements UserDetailsService{
 		
 		return new User(username, usuario.getPassword(), usuario.isEnabled(), true, true, true, authorities);
 	} //interface de Spring Security
+
+	@Override
+	@Transactional(readOnly = true)
+	public Usuario findByUsername(String username) {
+		return usuarioDao.findByUsername(username);
+	}
 	
 	
 }
